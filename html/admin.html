@@ -22,7 +22,10 @@
     {% endwith %}
 
     <section class="card page-manage-card">
-      <h2>页面管理</h2>
+      <div class="admin-header">
+        <h2>页面管理</h2>
+        <a href="{{ url_for('logout') }}" class="logout-btn">退出登录</a>
+      </div>
       <article class="manage-block">
         <h3>当前页面</h3>
         <div class="grid">
@@ -40,10 +43,17 @@
             访问路径：<code>{{ url_for('page_entry', slug=current_slug) }}</code>
           </div>
         </div>
-        <label>
-          页面标题
-          <input form="editor-form" name="page_title" value="{{ page_title }}" />
-        </label>
+        <form method="post" class="title-form">
+          <input type="hidden" name="action" value="save_page_title" />
+          <input type="hidden" name="page_slug" value="{{ current_slug }}" />
+          <label>
+            页面标题
+            <div class="title-input-group">
+              <input name="page_title" value="{{ page_title }}" />
+              <button type="submit" class="pill primary compact">保存标题</button>
+            </div>
+          </label>
+        </form>
       </article>
 
       <article class="manage-block">
@@ -81,18 +91,13 @@
     <section class="card">
       <div class="actions header">
         <h2>标题区块</h2>
-        <button type="submit" name="action" value="delete_hero" class="pill danger" onclick="return confirm('确定删除标题区块？');">删除标题区块</button>
+        <button type="submit" name="action" value="delete_hero" class="pill danger enhanced" onclick="return confirm('确定删除标题区块？');">删除标题区块</button>
       </div>
       <input type="hidden" name="hero_present" value="1" />
-        <p class="subtitle">调整文案后点击“保存更改”，系统会同步写入数据库并更新 portal_data.json 快照。</p>
         <div class="grid">
           <label>
             区块标题
             <input name="section_label" value="{{ data.meta.sectionLabel }}" />
-          </label>
-          <label>
-            管理页链接
-            <input name="admin_link" value="{{ data.meta.adminLink }}" />
           </label>
         </div>
         <label>
@@ -119,7 +124,7 @@
       <section class="card">
         <div class="actions header">
           <h2>页面区块</h2>
-          <button type="submit" name="action" value="add_section" class="ghost">新增区块</button>
+          <button type="submit" name="action" value="add_section" class="ghost white-border">新增区块</button>
         </div>
         <input type="hidden" name="section_count" value="{{ data.sections|length }}">
         <div class="stack">
@@ -127,20 +132,22 @@
             {% set section_index = loop.index0 %}
             <div class="service-card">
               <header>
-                <div>
+                <div class="section-info">
                   <h3>区块 {{ loop.index }}</h3>
                   <p class="meta">
                     {% if section.type == 'text_plain' %}纯文本 · 无标题{% elif section.type == 'text_titled' %}纯文本 · 有标题{% elif section.type == 'cards_horizontal' %}卡片 · 横向{% else %}卡片 · 纵向{% endif %}
                   </p>
+                  <div class="section-type-selector">
+                    <select name="sections-{{ loop.index0 }}-variant" class="inline-select with-arrow">
+                      <option value="text_plain" {% if section.type == 'text_plain' %}selected{% endif %}>纯文本（无标题）</option>
+                      <option value="text_titled" {% if section.type == 'text_titled' %}selected{% endif %}>纯文本（有标题）</option>
+                      <option value="cards_horizontal" {% if section.type == 'cards_horizontal' %}selected{% endif %}>卡片（横向）</option>
+                      <option value="cards_vertical" {% if section.type == 'cards_vertical' %}selected{% endif %}>卡片（纵向）</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="actions">
-                  <select name="sections-{{ loop.index0 }}-variant" class="inline-select">
-                    <option value="text_plain" {% if section.type == 'text_plain' %}selected{% endif %}>纯文本（无标题）</option>
-                    <option value="text_titled" {% if section.type == 'text_titled' %}selected{% endif %}>纯文本（有标题）</option>
-                    <option value="cards_horizontal" {% if section.type == 'cards_horizontal' %}selected{% endif %}>卡片（横向）</option>
-                    <option value="cards_vertical" {% if section.type == 'cards_vertical' %}selected{% endif %}>卡片（纵向）</option>
-                  </select>
-                  <button type="submit" name="action" value="delete_section_{{ loop.index0 }}" class="pill danger" onclick="return confirm('确定删除该区块吗？');">删除区块</button>
+                <div class="section-actions">
+                  <button type="submit" name="action" value="delete_section_{{ loop.index0 }}" class="pill danger enhanced" onclick="return confirm('确定删除该区块吗？');">删除区块</button>
                 </div>
               </header>
               <label>

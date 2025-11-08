@@ -2,8 +2,12 @@ import json
 import os
 import re
 import sqlite3
+from datetime import datetime, timedelta
+from functools import wraps
 from pathlib import Path
 
+import bcrypt
+from dotenv import load_dotenv
 from flask import (
     Flask,
     abort,
@@ -12,6 +16,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
 
@@ -48,7 +53,6 @@ def load_default_payload():
     return {
         "meta": {
             "sectionLabel": "Tools Portal",
-            "adminLink": "http://localhost:5000/admin",
         },
         "hero": default_hero("工具面板"),
         "sections": [],
@@ -174,6 +178,18 @@ def get_page(slug):
     }
 
 
+def save_page_title_only(slug, title):
+    ensure_db()
+    conn = get_conn()
+    conn.execute(
+        "UPDATE pages SET title = ? WHERE slug = ?",
+        (title, slug),
+    )
+    conn.commit()
+    conn.close()
+    export_snapshot()
+
+
 def save_page(slug, title, data):
     ensure_db()
     payload = json.dumps(data, ensure_ascii=False, indent=2)
@@ -275,7 +291,6 @@ def new_page_payload(title="新建页面"):
     return {
         "meta": {
             "sectionLabel": "页面说明",
-            "adminLink": "http://localhost:5000/admin",
         },
         "hero": default_hero(title),
         "sections": [],
@@ -296,7 +311,6 @@ def parse_form(form):
     return {
         "meta": {
             "sectionLabel": form.get("section_label", "").strip(),
-            "adminLink": form.get("admin_link", "").strip() or "http://localhost:5000/admin",
         },
         "hero": hero_data,
         "sections": parse_sections(form),
@@ -305,13 +319,53 @@ def parse_form(form):
 
 
 HTML_DIR = BASE_DIR / "html"
+
+# Load environment variables
+load_dotenv()
+
 app = Flask(
     __name__,
     static_folder=str(HTML_DIR),
     template_folder=str(HTML_DIR),
     static_url_path="",
 )
-app.secret_key = "trevor-portal-admin"
+
+# Configure app with environment variables
+# Auto-generate SECRET_KEY if not provided (recommended for single instance)
+# For multi-instance deployments, set SECRET_KEY environment variable
+import secrets
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.permanent_session_lifetime = timedelta(minutes=int(os.environ.get("SESSION_TIMEOUT_MINUTES", "120")))
+
+# Authentication configuration
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+
+
+def check_password(password):
+    """Check if the provided password matches the admin password."""
+    # For simple deployment, use plain text comparison
+    # In production, you should hash the password in .env and use bcrypt
+    return password == ADMIN_PASSWORD
+
+
+def require_auth(f):
+    """Decorator to require authentication for admin routes."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            flash('请登录以访问管理页面。', 'info')
+            return redirect(url_for('login'))
+
+        # Check session timeout
+        if 'login_time' in session:
+            login_time = datetime.fromisoformat(session['login_time'])
+            if datetime.now() - login_time > app.permanent_session_lifetime:
+                session.clear()
+                flash('会话已过期，请重新登录。', 'info')
+                return redirect(url_for('login'))
+
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route("/")
@@ -346,7 +400,37 @@ def current_page_or_default(slug):
     return (pages[0]["slug"] if pages else "home"), pages
 
 
+@app.route("/admin/login", methods=["GET", "POST"])
+def login():
+    """Admin login page."""
+    if request.method == "POST":
+        password = request.form.get("password", "")
+
+        if check_password(password):
+            session.permanent = True
+            session['authenticated'] = True
+            session['login_time'] = datetime.now().isoformat()
+            flash('登录成功！', 'success')
+
+            # Redirect to admin page or original destination
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('admin'))
+        else:
+            flash('密码错误，请重试。', 'info')
+
+    return render_template("login.html")
+
+
+@app.route("/admin/logout")
+def logout():
+    """Admin logout."""
+    session.clear()
+    flash('已退出登录。', 'info')
+    return redirect(url_for('login'))
+
+
 @app.route("/admin", methods=["GET", "POST"])
+@require_auth
 def admin():
     requested_slug = request.args.get("slug") or request.form.get("page_slug")
     slug, pages = current_page_or_default(requested_slug)
@@ -375,6 +459,15 @@ def admin():
                 return redirect(url_for("admin", slug=slug))
             new_slug = current_page_or_default(None)[0]
             return redirect(url_for("admin", slug=new_slug))
+
+        if action == "save_page_title":
+            page_title = (request.form.get("page_title") or "").strip() or slug
+            try:
+                save_page_title_only(slug, page_title)
+                flash("页面标题已保存。", "success")
+            except Exception as exc:
+                flash(f"保存标题时出错：{str(exc)}", "info")
+            return redirect(url_for("admin", slug=slug))
 
         page_title = (request.form.get("page_title") or "").strip() or slug
         form_data = parse_form(request.form)

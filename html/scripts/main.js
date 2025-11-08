@@ -147,14 +147,6 @@ const renderHero = (data, meta, pageTitle) => {
     section.appendChild(chips);
   }
 
-  if (meta?.adminLink) {
-    const adminLink = document.createElement('a');
-    adminLink.href = meta.adminLink;
-    adminLink.className = 'admin-link';
-    adminLink.textContent = '打开管理页';
-    adminLink.setAttribute('rel', 'noopener');
-    section.appendChild(adminLink);
-  }
 
   return section;
 };

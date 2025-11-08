@@ -4,8 +4,7 @@
       "title": "示例页面",
       "data": {
         "meta": {
-          "sectionLabel": "Tools Portal",
-          "adminLink": "http://localhost:5000/admin"
+          "sectionLabel": "Tools Portal"
         },
         "hero": {
           "title": "工具面板",

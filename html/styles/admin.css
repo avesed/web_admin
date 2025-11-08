@@ -166,14 +166,27 @@ textarea {
 }
 
 .service-card.nested {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .service-card header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.service-card header .section-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.service-card header .section-actions {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
 }
 
 .service-card header .meta {
@@ -188,6 +201,30 @@ textarea {
   flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
+}
+
+.section-type-selector {
+  position: relative;
+  max-width: 200px;
+}
+
+.section-type-selector select.inline-select.with-arrow {
+  padding-right: 2rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.section-type-selector::after {
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
 }
 
 .service-card header h3 {
@@ -218,6 +255,26 @@ textarea {
 
 .pill.danger:hover {
   border-color: var(--danger);
+}
+
+.pill.danger.enhanced {
+  border-color: rgba(255, 131, 122, 0.7);
+  color: var(--danger);
+  background: rgba(255, 131, 122, 0.08);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pill.danger.enhanced:hover {
+  border-color: var(--danger);
+  background: rgba(255, 131, 122, 0.15);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 131, 122, 0.25);
+}
+
+.pill.danger.enhanced:active {
+  transform: translateY(0);
 }
 
 .manage-block {
@@ -307,6 +364,27 @@ select.inline-select {
   font-family: inherit;
   font-size: 0.9rem;
   appearance: none;
+}
+
+.title-form {
+  margin-top: 0.8rem;
+}
+
+.title-input-group {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+}
+
+.title-input-group input {
+  flex: 1;
+}
+
+.title-input-group .pill.compact {
+  padding: 0.8rem 1.2rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  margin: 0;
 }
 
 .page-path {
@@ -399,6 +477,15 @@ select.inline-select {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.ghost.white-border {
+  border-color: #ffffff;
+}
+
+.ghost.white-border:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .link {
   text-decoration: none;
   color: var(--accent);
@@ -427,6 +514,88 @@ select.inline-select {
 
 .flash.info {
   border-color: rgba(127, 228, 255, 0.4);
+  color: var(--accent);
+}
+
+/* Login page styles */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.login-card {
+  width: 100%;
+  text-align: center;
+}
+
+.login-card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-card .subtitle {
+  margin-bottom: 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.login-actions button {
+  min-width: 200px;
+  padding: 0.85rem 2.5rem;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Admin header with logout */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.logout-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  border-color: var(--accent);
   color: var(--accent);
 }
 
@@ -469,5 +638,24 @@ select.inline-select {
 
   .actions button {
     width: 100%;
+  }
+
+  .service-card header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .service-card header .section-actions {
+    margin-top: 0;
+  }
+
+  .section-type-selector {
+    max-width: none;
+  }
+
+  .pill.danger.enhanced {
+    width: 100%;
+    text-align: center;
   }
 }

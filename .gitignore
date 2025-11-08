@@ -6,6 +6,9 @@ data/*
 html/data/*
 .claud/*
 
+# Environment variables (contains sensitive passwords)
+.env
+
 # Node / frontend
 node_modules/
 dist/
