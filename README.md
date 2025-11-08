@@ -9,7 +9,7 @@
 
 ## Docker
 
-使用预构建镜像（推荐）：
+使用镜像：
 ```bash
 docker pull ghcr.io/avesed/webadmin:latest
 docker run -d --name web_admin \
@@ -27,7 +27,7 @@ docker build -t web_admin .
 ## 本地开发
 1. 复制示例环境变量并设置强口令：\
    `cp .env.example .env`
-2. （推荐）创建虚拟环境并安装依赖：
+2. 创建虚拟环境并安装依赖：
    ```bash
    python -m venv .venv
    source .venv/bin/activate
