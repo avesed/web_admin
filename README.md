@@ -19,11 +19,6 @@ docker run -d --name web_admin \
   ghcr.io/avesed/webadmin:latest
 ```
 
-需要自定义镜像时，可在仓库根目录自行构建：
-```bash
-docker build -t web_admin .
-```
-
 ## 本地开发
 1. 复制示例环境变量并设置强口令：\
    `cp .env.example .env`
