@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trevor · Portal Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/admin.css">
+</head>
+<body>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="card page-manage-card">
+      <h2>页面管理</h2>
+      <article class="manage-block">
+        <h3>当前页面</h3>
+        <div class="grid">
+          <label class="page-selector">
+            选择页面
+            <select onchange="if(this.value){ window.location='?slug='+this.value; }">
+              {% for page in pages %}
+                <option value="{{ page.slug }}" {% if page.slug == current_slug %}selected{% endif %}>
+                  {{ page.title or page.slug }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+          <div class="page-path">
+            访问路径：<code>{{ url_for('page_entry', slug=current_slug) }}</code>
+          </div>
+        </div>
+        <label>
+          页面标题
+          <input form="editor-form" name="page_title" value="{{ page_title }}" />
+        </label>
+      </article>
+
+      <article class="manage-block">
+        <h3>新建页面</h3>
+        <form method="post">
+          <input type="hidden" name="action" value="create_page" />
+          <div class="grid">
+            <label>
+              新页面标题
+              <input name="new_page_title" placeholder="例如 新手指南" />
+            </label>
+            <label>
+              Slug (a-z0-9-)
+              <input name="new_page_slug" placeholder="example-slug" />
+            </label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">新增页面</button>
+          </div>
+        </form>
+      </article>
+
+      {% if pages|length > 1 %}
+        <form method="post" onsubmit="return confirm('确定删除当前页面？');">
+          <input type="hidden" name="action" value="delete_page" />
+          <input type="hidden" name="target_page_slug" value="{{ current_slug }}" />
+          <button type="submit" class="pill danger">删除当前页面</button>
+        </form>
+      {% endif %}
+    </section>
+
+    <form method="post" id="editor-form">
+      <input type="hidden" name="page_slug" value="{{ current_slug }}" />
+    {% if data.hero %}
+    <section class="card">
+      <div class="actions header">
+        <h2>标题区块</h2>
+        <button type="submit" name="action" value="delete_hero" class="pill danger" onclick="return confirm('确定删除标题区块？');">删除标题区块</button>
+      </div>
+      <input type="hidden" name="hero_present" value="1" />
+        <p class="subtitle">调整文案后点击“保存更改”，系统会同步写入数据库并更新 portal_data.json 快照。</p>
+        <div class="grid">
+          <label>
+            区块标题
+            <input name="section_label" value="{{ data.meta.sectionLabel }}" />
+          </label>
+          <label>
+            管理页链接
+            <input name="admin_link" value="{{ data.meta.adminLink }}" />
+          </label>
+        </div>
+        <label>
+          主标题
+          <input name="hero_title" value="{{ data.hero.title }}" />
+        </label>
+        <label>
+          描述
+          <textarea name="hero_description">{{ data.hero.description }}</textarea>
+        </label>
+        <label>
+          标签（每行一条）
+          <textarea name="hero_chips">{{ data.hero.chips | join('\n') }}</textarea>
+        </label>
+      </section>
+    {% else %}
+    <section class="card">
+      <h2>标题区块</h2>
+      <p class="subtitle">当前页面没有标题区块，添加后可以设置主标题与说明。</p>
+      <button type="submit" name="action" value="restore_hero" class="ghost">添加标题区块</button>
+    </section>
+    {% endif %}
+
+      <section class="card">
+        <div class="actions header">
+          <h2>页面区块</h2>
+          <button type="submit" name="action" value="add_section" class="ghost">新增区块</button>
+        </div>
+        <input type="hidden" name="section_count" value="{{ data.sections|length }}">
+        <div class="stack">
+          {% for section in data.sections %}
+            {% set section_index = loop.index0 %}
+            <div class="service-card">
+              <header>
+                <div>
+                  <h3>区块 {{ loop.index }}</h3>
+                  <p class="meta">
+                    {% if section.type == 'text_plain' %}纯文本 · 无标题{% elif section.type == 'text_titled' %}纯文本 · 有标题{% elif section.type == 'cards_horizontal' %}卡片 · 横向{% else %}卡片 · 纵向{% endif %}
+                  </p>
+                </div>
+                <div class="actions">
+                  <select name="sections-{{ loop.index0 }}-variant" class="inline-select">
+                    <option value="text_plain" {% if section.type == 'text_plain' %}selected{% endif %}>纯文本（无标题）</option>
+                    <option value="text_titled" {% if section.type == 'text_titled' %}selected{% endif %}>纯文本（有标题）</option>
+                    <option value="cards_horizontal" {% if section.type == 'cards_horizontal' %}selected{% endif %}>卡片（横向）</option>
+                    <option value="cards_vertical" {% if section.type == 'cards_vertical' %}selected{% endif %}>卡片（纵向）</option>
+                  </select>
+                  <button type="submit" name="action" value="delete_section_{{ loop.index0 }}" class="pill danger" onclick="return confirm('确定删除该区块吗？');">删除区块</button>
+                </div>
+              </header>
+              <label>
+                小标题
+                <input name="sections-{{ loop.index0 }}-heading" value="{{ section.heading }}" />
+              </label>
+              {% if section.type.startswith('text') %}
+                <label>
+                  内容（支持 Markdown）
+                  <textarea name="sections-{{ loop.index0 }}-content">{{ section.content }}</textarea>
+                </label>
+              {% else %}
+                <input type="hidden" name="sections-{{ loop.index0 }}-card_count" value="{{ section.cards|length }}">
+                <div class="stack">
+                  {% for card in section.cards %}
+                    <div class="service-card nested">
+                      <header>
+                        <h4>卡片 {{ loop.index }}</h4>
+                        <button type="submit" name="action" value="delete_card_{{ section_index }}_{{ loop.index0 }}" class="pill danger" onclick="return confirm('删除这张卡片？');">删除</button>
+                      </header>
+                      <div class="grid">
+                        <label>
+                          标题
+                          <input name="sections-{{ section_index }}-cards-{{ loop.index0 }}-title" value="{{ card.title }}" />
+                        </label>
+                        <label>
+                          状态
+                          <input name="sections-{{ section_index }}-cards-{{ loop.index0 }}-status" value="{{ card.status }}" />
+                        </label>
+                        <label>
+                          按钮文案
+                          <input name="sections-{{ section_index }}-cards-{{ loop.index0 }}-link_label" value="{{ card.linkLabel }}" />
+                        </label>
+                        <label>
+                          链接地址
+                          <input name="sections-{{ section_index }}-cards-{{ loop.index0 }}-link_url" value="{{ card.linkUrl }}" />
+                        </label>
+                      </div>
+                      <label>
+                        内容（支持 Markdown）
+                        <textarea name="sections-{{ section_index }}-cards-{{ loop.index0 }}-content">{{ card.content }}</textarea>
+                      </label>
+                      <label>
+                        补充信息（每行一条）
+                        <textarea name="sections-{{ section_index }}-cards-{{ loop.index0 }}-meta">{{ card.meta | join('\n') }}</textarea>
+                      </label>
+                    </div>
+                  {% endfor %}
+                </div>
+                <button type="submit" name="action" value="add_card_{{ section_index }}" class="pill">新增卡片</button>
+              {% endif %}
+            </div>
+          {% else %}
+            <p class="muted-text">暂无区块，点击"新增区块"开始配置。</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="card">
+        <label>
+          页脚文案
+          <input name="footer" value="{{ data.footer }}" />
+        </label>
+      </section>
+
+      <section class="card actions">
+        <button type="submit" name="action" value="save" class="primary">保存更改</button>
+        <button type="submit" name="action" value="reset" class="ghost" onclick="return confirm('确定放弃未保存的修改并恢复文件内容吗？');">重置</button>
+        <a class="link" href="{{ url_for('page_entry', slug=current_slug) }}" target="_blank" rel="noopener">查看页面</a>
+      </section>
+    </form>
+  </main>
+</body>
+</html>

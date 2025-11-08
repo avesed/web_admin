@@ -1,0 +1,89 @@
+  {
+  "pages": {
+    "home": {
+      "title": "示例页面",
+      "data": {
+        "meta": {
+          "sectionLabel": "Tools Portal",
+          "adminLink": "http://localhost:5000/admin"
+        },
+        "hero": {
+          "title": "工具面板",
+          "description": "把常用的 VPN、内部应用和说明文档集中在一个页面，方便其他人快速访问。",
+          "chips": [
+            "Hello World",
+            "联系：示例邮箱"
+          ]
+        },
+        "sections": [
+          {
+            "type": "cards_horizontal",
+            "heading": "常用服务",
+            "cards": [
+              {
+                "title": "内部 VPN",
+                "status": "ONLINE",
+                "content": "用于访问公司内网、共享文件和内部系统，随时保障安全连接。",
+                "meta": ["端口 51820/UDP", "节点：示例节点", "配置文件见共享盘"],
+                "linkLabel": "查看指引",
+                "linkUrl": "https://vpn.example.com"
+              },
+              {
+                "title": "知识库",
+                "status": "ONLINE",
+                "content": "存放操作手册、FAQ、培训材料，随时查阅更新。",
+                "meta": ["包含入职说明", "最新更新自动推送"],
+                "linkLabel": "打开知识库",
+                "linkUrl": "https://docs.example.com"
+              },
+              {
+                "title": "API 入口",
+                "status": "ONLINE",
+                "content": "统一的接口层，封装数据服务和业务模块，提供 Swagger 文档。",
+                "meta": ["https://api.example.com/v1", "Token + IP 白名单"],
+                "linkLabel": "查看文档",
+                "linkUrl": "https://api.example.com/docs"
+              },
+              {
+                "title": "流程与教程",
+                "status": "UPDATED",
+                "content": "把 VPN、应用登录、部署步骤做成图文教程，遇到问题先按流程排查。",
+                "meta": ["PDF/网页双版本", "定期更新", "含常见问题"],
+                "linkLabel": "打开教程",
+                "linkUrl": "https://guide.example.com"
+              }
+            ]
+          },
+          {
+            "type": "cards_vertical",
+            "heading": "速查清单",
+            "cards": [
+              {
+                "title": "初次接入",
+                "status": "",
+                "content": "1. VPN：导入配置 → 联系管理员开 IP → 测试内网地址。\n2. 应用：使用公司邮箱 + OTP 登录。\n3. API：登记 IP → 获取 Token → 用 curl 测试。",
+                "meta": [],
+                "linkLabel": "",
+                "linkUrl": ""
+              },
+              {
+                "title": "常见故障",
+                "status": "",
+                "content": "- 备份时间短暂断流属正常，稍等再试。\n- App 打不开：清缓存或更换浏览器。\n- API 401：Token 过期或撤销，重新申请。\n- 仍无法解决：联系管理员。",
+                "meta": [],
+                "linkLabel": "",
+                "linkUrl": ""
+              }
+            ]
+          },
+          {
+            "type": "text_titled",
+            "heading": "公告与提醒",
+            "content": "- 服务器每天凌晨备份，期间可能有短暂重连。\n- 所有教程集中在 `guide.example.com`，也可以下载离线版。\n- 新设备接入前请提前登记 MAC/IP，以免被网关阻挡。"
+          }
+        ],
+        "footer": "© 2025 Avesed"
+      }
+    }
+  }
+}
