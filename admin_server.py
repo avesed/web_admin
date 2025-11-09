@@ -469,6 +469,19 @@ def admin():
                 flash(f"保存标题时出错：{str(exc)}", "info")
             return redirect(url_for("admin", slug=slug))
 
+        if action == "reset":
+            page = get_page(slug)
+            if not page:
+                abort(404)
+            flash("已恢复到上次保存的内容。", "info")
+            return render_template(
+                "admin.html",
+                data=page["data"],
+                pages=pages,
+                current_slug=slug,
+                page_title=page["title"],
+            )
+
         page_title = (request.form.get("page_title") or "").strip() or slug
         form_data = parse_form(request.form)
 
@@ -537,7 +550,7 @@ def admin():
 
         if action.startswith("delete_card_"):
             try:
-                _, sec_idx, card_idx = action.split("_")
+                _, sec_idx, card_idx = action.rsplit("_", 2)
                 sec_idx = int(sec_idx)
                 card_idx = int(card_idx)
                 section = form_data["sections"][sec_idx]

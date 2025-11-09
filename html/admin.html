@@ -124,16 +124,16 @@
       <section class="card">
         <div class="actions header">
           <h2>页面区块</h2>
-          <button type="submit" name="action" value="add_section" class="ghost white-border">新增区块</button>
+          <button type="submit" name="action" value="add_section" class="ghost white-border" data-preserve-scroll>新增区块</button>
         </div>
-        <input type="hidden" name="section_count" value="{{ data.sections|length }}">
-        <div class="stack">
+        <input type="hidden" name="section_count" value="{{ data.sections|length }}" data-section-count>
+        <div class="stack" data-sortable="sections">
           {% for section in data.sections %}
             {% set section_index = loop.index0 %}
-            <div class="service-card">
+            <div class="service-card" data-section-item data-sort-item data-section-index="{{ section_index }}">
               <header>
                 <div class="section-info">
-                  <h3>区块 {{ loop.index }}</h3>
+                  <h3 data-section-label>区块 {{ loop.index }}</h3>
                   <p class="meta">
                     {% if section.type == 'text_plain' %}纯文本 · 无标题{% elif section.type == 'text_titled' %}纯文本 · 有标题{% elif section.type == 'cards_horizontal' %}卡片 · 横向{% else %}卡片 · 纵向{% endif %}
                   </p>
@@ -147,7 +147,10 @@
                   </div>
                 </div>
                 <div class="section-actions">
-                  <button type="submit" name="action" value="delete_section_{{ loop.index0 }}" class="pill danger enhanced" onclick="return confirm('确定删除该区块吗？');">删除区块</button>
+                  <button type="button" class="icon-button drag-handle" data-drag-handle="section" aria-label="拖动区块排序">
+                    <span aria-hidden="true"></span>
+                  </button>
+                  <button type="submit" name="action" value="delete_section_{{ loop.index0 }}" data-section-action="delete_section" class="pill danger enhanced" onclick="return confirm('确定删除该区块吗？');">删除区块</button>
                 </div>
               </header>
               <label>
@@ -160,13 +163,20 @@
                   <textarea name="sections-{{ loop.index0 }}-content">{{ section.content }}</textarea>
                 </label>
               {% else %}
-                <input type="hidden" name="sections-{{ loop.index0 }}-card_count" value="{{ section.cards|length }}">
-                <div class="stack">
+                <input type="hidden" name="sections-{{ loop.index0 }}-card_count" value="{{ section.cards|length }}" data-card-count>
+                <div class="stack" data-sortable="cards">
                   {% for card in section.cards %}
-                    <div class="service-card nested">
+                    <div class="service-card nested" data-card-item data-sort-item data-card-index="{{ loop.index0 }}">
                       <header>
-                        <h4>卡片 {{ loop.index }}</h4>
-                        <button type="submit" name="action" value="delete_card_{{ section_index }}_{{ loop.index0 }}" class="pill danger" onclick="return confirm('删除这张卡片？');">删除</button>
+                        <div class="card-title">
+                          <h4 data-card-label>卡片 {{ loop.index }}</h4>
+                        </div>
+                        <div class="section-actions">
+                          <button type="button" class="icon-button drag-handle" data-drag-handle="card" aria-label="拖动卡片排序">
+                            <span aria-hidden="true"></span>
+                          </button>
+                          <button type="submit" name="action" value="delete_card_{{ section_index }}_{{ loop.index0 }}" data-card-delete class="pill danger" onclick="return confirm('删除这张卡片？');">删除</button>
+                        </div>
                       </header>
                       <div class="grid">
                         <label>
@@ -197,7 +207,7 @@
                     </div>
                   {% endfor %}
                 </div>
-                <button type="submit" name="action" value="add_card_{{ section_index }}" class="pill">新增卡片</button>
+                <button type="submit" name="action" value="add_card_{{ section_index }}" data-section-action="add_card" class="pill" data-preserve-scroll>新增卡片</button>
               {% endif %}
             </div>
           {% else %}
@@ -220,5 +230,6 @@
       </section>
     </form>
   </main>
+  <script src="/scripts/admin.js" defer></script>
 </body>
 </html>

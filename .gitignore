@@ -4,7 +4,7 @@ __pycache__/
 portal_data.db
 data/*
 html/data/*
-.claud/*
+
 
 # Environment variables (contains sensitive passwords)
 .env
